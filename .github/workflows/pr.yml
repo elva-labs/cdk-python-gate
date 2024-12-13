@@ -1,0 +1,57 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -r requirements-dev.txt
+
+      - name: Run pytest with coverage
+        run: |
+          pytest tests/ --cov=src --cov-report=xml --cov-report=term
+
+      - name: Generate Coverage Percentage
+        id: coverage
+        run: |
+          coverage_percentage=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); print(f'{float(tree.getroot().attrib['line-rate']) * 100:.2f}')")
+          echo "total_coverage=$coverage_percentage" >> $GITHUB_OUTPUT
+
+      - name: Create Coverage Badge
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            const coveragePercentage = '${{ steps.coverage.outputs.total_coverage }}';
+
+            // Determine badge color based on coverage
+            let badgeColor = 'red';
+            if (coveragePercentage >= 90) badgeColor = 'brightgreen';
+            else if (coveragePercentage >= 80) badgeColor = 'green';
+            else if (coveragePercentage >= 70) badgeColor = 'yellowgreen';
+            else if (coveragePercentage >= 60) badgeColor = 'yellow';
+
+            const badgeUrl = `https://img.shields.io/badge/coverage-${coveragePercentage}%25-${badgeColor}`;
+
+            // Create a comment on the PR
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Code Coverage Report\n\n![Coverage](${badgeUrl})\n\nDetailed coverage report:\n\n\`\`\`\n$(cat coverage.xml)\n\`\`\``
+            });
