@@ -26,6 +26,7 @@ jobs:
           pytest tests/
 
   deploy-dev:
+    environment: dev
     needs: test
     runs-on: ubuntu-latest
     permissions:
@@ -67,6 +68,7 @@ jobs:
           AWS_ACCOUNT: ${{ secrets.AWS_DEV_ACCOUNT_ID }}
 
   deploy-prod:
+    environment: prod
     needs: deploy-dev
     runs-on: ubuntu-latest
     permissions:
