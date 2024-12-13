@@ -49,7 +49,7 @@ jobs:
       - name: Configure AWS Credentials for Development
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_DEV_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
           aws-region: eu-north-1
 
       - name: Install cdk
@@ -58,14 +58,10 @@ jobs:
       - name: CDK Bootstrap for Development
         run: |
           cdk bootstrap
-        env:
-          AWS_ACCOUNT: ${{ secrets.AWS_DEV_ACCOUNT_ID }}
 
       - name: CDK Deploy to Development
         run: |
           cdk deploy --require-approval never
-        env:
-          AWS_ACCOUNT: ${{ secrets.AWS_DEV_ACCOUNT_ID }}
 
   deploy-prod:
     environment: prod
@@ -91,7 +87,7 @@ jobs:
       - name: Configure AWS Credentials for Production
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_PROD_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
           aws-region: eu-north-1
 
       - name: Install cdk
@@ -100,11 +96,7 @@ jobs:
       - name: CDK Bootstrap for Production
         run: |
           cdk bootstrap
-        env:
-          AWS_ACCOUNT: ${{ secrets.AWS_PROD_ACCOUNT_ID }}
 
       - name: CDK Deploy to Production
         run: |
           cdk deploy --require-approval never
-        env:
-          AWS_ACCOUNT: ${{ secrets.AWS_PROD_ACCOUNT_ID }}
