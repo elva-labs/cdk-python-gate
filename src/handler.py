@@ -12,7 +12,9 @@ def lambda_handler(event, context):
     """
     try:
         # Retrieve the environment variable
-        success_message = os.environ.get("SUCCESS_MESSAGE", "Default success message")
+        success_message = os.environ.get(
+            "SUCCESS_MESSAGE", "Default success message, NICE!"
+        )
 
         # Process the incoming event
         print(f"Received event: {event}")
