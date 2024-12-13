@@ -1,26 +1,33 @@
 from aws_cdk import (
     Stack,
     aws_lambda as lambda_,
+    CfnOutput,
 )
 from constructs import Construct
 import os
 
 
 class CdkTestStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct, construct_id: str, stage: str, **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # Use stage variable to make resource names unique
+        lambda_name = f"TestLambdaFunction-{stage}"
 
         # Create Lambda function with environment variable
         self.lambda_function = lambda_.Function(
             self,
-            "TestLambdaFunction",
+            lambda_name,
             runtime=lambda_.Runtime.PYTHON_3_12,
             handler="handler.lambda_handler",
             code=lambda_.Code.from_asset(
                 os.path.join(os.path.dirname(__file__), "..", "src")
             ),
             environment={
-                "SUCCESS_MESSAGE": "Hello from Lambda with CDK-set environment variable!"
+                "SUCCESS_MESSAGE": f"Hello from Lambda in {stage} stage!",
+                "STAGE": stage,
             },
         )
 
@@ -37,4 +44,9 @@ class CdkTestStack(Stack):
         )
 
         # Output the Function URL for easy access
-        self.outputs = {"LambdaFunctionUrl": self.lambda_function_url.url}
+        CfnOutput(
+            self,
+            f"LambdaFunctionUrl-{stage}",
+            value=self.lambda_function_url.url,
+            description=f"The URL of the Lambda function in the {stage} stage",
+        )

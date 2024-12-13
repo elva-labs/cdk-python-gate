@@ -48,10 +48,13 @@ jobs:
 
             const badgeUrl = `https://img.shields.io/badge/coverage-${coveragePercentage}%25-${badgeColor}`;
 
+            // Read the coverage.xml file
+            const coverageReport = fs.readFileSync('coverage.xml', 'utf-8');
+
             // Create a comment on the PR
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `### Code Coverage Report\n\n![Coverage](${badgeUrl})\n\nDetailed coverage report:\n\n\`\`\`\n$(cat coverage.xml)\n\`\`\``
+              body: `### Code Coverage Report\n\n![Coverage](${badgeUrl})\n\nDetailed coverage report:\n\n\`\`\`xml\n${coverageReport}\n\`\`\``
             });
