@@ -43,4 +43,4 @@ def test_lambda_handler_default_message():
 
     # Assert the response falls back to default
     assert response["statusCode"] == 200
-    assert response["body"] == json.dumps("Default success message")
+    assert response["body"] == json.dumps("Default success message, NICE!")
